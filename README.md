@@ -1,10 +1,8 @@
 # Dragging through gradients
 
 A browser demo that joins evg's declarative dragging with the automatic differentiation of the
-the-sett/elm-max package, running in plain Elm. Plans and results:
-`plans/grad-drag-spike.md` (the tentacle, cannon and fit), `plans/grad-drag-round2.md`
-(`Eval.prepare`, the lens and the boundary) and `plans/grad-drag-round3.md` (the cube, the
-interference pattern, the epidemic, the layout and the Bézier curve).
+the-sett/elm-max package, running in plain Elm. It is an [elm-pages](https://elm-pages.com) site,
+deployed to Netlify; "Running it" below says how to build, test and serve it.
 
 **Declarative dragging** comes from the paper *Declarative Dragging*
 (<https://declarative-dragging.github.io/>), in Elm as evg's `Evg.Drag`. A drawing doesn't handle
@@ -91,19 +89,36 @@ drawn lazily (`Html.Lazy`), so a message re-renders only the panel it changed.
 
 ## Running it
 
+With Node.js 18 or later:
+
 ```
-make            # build/main.js; open index.html
-make page       # build/grad-drag.html: one self-contained file
-make test       # 56 tests: each model against its plain-Elm twin, Jacobians against finite differences, solvers, training
-make bench      # times the solvers under Node
-make smoke      # real drags in headless Chromium (CHROME=path to headless_shell)
+npm install         # elm-pages, its compiler, and Elm 0.19.1 with elm-format and elm-test-rs
+npm start           # the site at http://localhost:1234, rebuilt as the sources change
+npm run build       # the static site in dist/
+npm test            # 58 tests: each model against its plain-Elm twin, Jacobians against finite differences, solvers, training
+npm run bench       # times the solvers under Node
+npm run format      # elm-format the site's own Elm (not vendor/)
 ```
 
-It uses stock Elm 0.19.1 from the repo's `build/toolchain/bin`. The sources are `src/` and evg
-in `vendor/evg/src` (the `declarative-dragging` branch with the patch described in
-`vendor/evg/PATCH.md`); the-sett/elm-max comes from the package registry.
+`scripts/smoke.cjs` makes real drags on a served page in headless Chromium; its first lines say how
+to run it.
 
-## Results (`make bench`, Node 22, 2026-11-13, with `Eval.prepare`)
+The page is one route, `app/Route/Index.elm`, which runs `src/Demo.elm`: the drawings' model,
+update and view. The other `src/` modules are the drawings and their solvers, evg is in
+`vendor/evg/src` (the `declarative-dragging` branch with the patch described in
+`vendor/evg/PATCH.md`), and the-sett/elm-max comes from the package registry. The page is styled by
+`src/Style.elm`, one elm-css stylesheet of `gd-*` classes. `elm-pages build` renders the page at
+build time, so its text and the drawings in their first state are in the HTML before the page's Elm
+starts.
+
+### Deploying
+
+`netlify.toml` configures Netlify: it builds with `npm run build` (after fetching Lamdera's
+compiler, which elm-pages uses) and publishes `dist/`. Connect the repository to a Netlify site and
+each push deploys it. Set the site's address in `src/Settings.elm` (`canonicalUrl`), for its
+canonical link and social card.
+
+## Results (`npm run bench`, Node 22, 2026-11-13, with `Eval.prepare`)
 
 The tentacle follows the same 200-move loop with each solver. Each solve starts from the previous
 answer, as during a drag.
@@ -137,7 +152,7 @@ answer, as during a drag.
 
 - **`Eval.prepare` made the graphs 1.2–2.7× faster.** The cannon's run went from 2.95 to 1.13 ms,
   the tentacle's move from 0.34 to 0.26 ms, `Train.step` from 0.40 to 0.33 ms.
-- **In headless Chromium** (`make smoke`), every panel keeps up with the 60 Hz pointer events
+- **In headless Chromium** (`scripts/smoke.cjs`), every panel keeps up with the 60 Hz pointer events
   (16–20 ms a move), and each dragged handle ends within about 1 px of where the pointer was
   released (the boundary within 0.03 px; the dragged interference band keeps its phase, 0.590
   against 0.588 wavelengths).

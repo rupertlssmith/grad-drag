@@ -1,3 +1,7 @@
+node_modules/
+dist/
+.elm-pages/
+functions/
 build/
 elm-stuff/
 eco-stuff/

@@ -1,0 +1,32 @@
+{
+  "name": "grad-drag",
+  "type": "module",
+  "scripts": {
+    "postinstall": "elm-tooling install",
+    "start": "elm-pages dev",
+    "build": "elm-pages build",
+    "test": "elm-test-rs",
+    "bench": "cd bench && elm make Bench.elm --optimize --output=../build/bench.js && cd .. && node bench/bench.cjs build/bench.js",
+    "format": "elm-format --yes app src tests bench/Bench.elm"
+  },
+  "devDependencies": {
+    "elm-codegen": "^0.6.1",
+    "elm-optimize-level-2": "^0.3.5",
+    "elm-pages": "3.0.27",
+    "elm-review": "^2.13.5",
+    "elm-tooling": "^1.17.0",
+    "lamdera": "^0.19.1-1.4.0",
+    "vite": "^7.3.1"
+  },
+  "dependencies": {
+    "@netlify/functions": "^5.1.2"
+  },
+  "overrides": {
+    "node-elm-compiler": {
+      "cross-spawn": "^6.0.6"
+    },
+    "devcert": {
+      "tmp": "^0.2.6"
+    }
+  }
+}

@@ -1,5 +1,9 @@
-// Smoke test in headless Chromium over the DevTools protocol (make smoke CHROME=...): real pointer drags
-// on every panel of build/grad-drag.html; reports where each grabbed handle ended up and page errors.
+// Smoke test in headless Chromium over the DevTools protocol: real pointer drags on every panel of the
+// page; reports where each grabbed handle ended up and page errors. Run it against the dev server or a
+// served build:
+//
+//   npm start                  (or: npm run build && python3 -m http.server -d dist 1234)
+//   node scripts/smoke.cjs CHROME http://localhost:1234/ build/smoke
 const { spawn } = require('child_process');
 const [, , chrome, page, shotPrefix] = process.argv;
 const proc = spawn(chrome, ['--no-sandbox', '--disable-gpu', '--hide-scrollbars', '--remote-debugging-port=9333', '--window-size=1040,5600', 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'] });

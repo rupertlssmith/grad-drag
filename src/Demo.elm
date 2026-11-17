@@ -1,11 +1,14 @@
-module Main exposing (main)
+module Demo exposing (Model, Msg, init, subscriptions, update, view)
 
 {-| Dragging through gradients: evg's declarative dragging (`Evg.Drag`) with solvers that use exact
 derivatives from the the-sett/elm-max package, evaluated in the browser by `Tensor.Eval`.
+
+The page's model, update, subscriptions and view, which the site's index route runs. Its elements
+are styled by the `gd-*` classes of `Style`.
+
 -}
 
 import Bezier
-import Browser
 import Browser.Events
 import Cannon
 import Classify
@@ -79,16 +82,6 @@ type Msg
     | Frame
     | FitControl Control
     | ClassifyControl Control
-
-
-main : Program () Model Msg
-main =
-    Browser.element
-        { init = \_ -> ( init, Cmd.none )
-        , update = \msg model -> ( update msg model, Cmd.none )
-        , subscriptions = subscriptions
-        , view = view
-        }
 
 
 init : Model
@@ -318,8 +311,8 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    Html.div [ A.style "font-family" "system-ui, -apple-system, sans-serif", A.style "color" "#212529", A.style "max-width" "1000px", A.style "margin" "0 auto", A.style "padding" "16px", A.style "line-height" "1.5" ]
-        [ Html.h1 [ A.style "margin-bottom" "4px" ] [ Html.text "Dragging through gradients" ]
+    Html.div [ A.class "gd-page" ]
+        [ Html.h1 [ A.class "gd-title" ] [ Html.text "Dragging through gradients" ]
         , para
             [ Html.text "Each drawing below is draggable the declarative way ("
             , link "https://declarative-dragging.github.io/" "Declarative Dragging"
@@ -344,7 +337,7 @@ view model =
             ]
             [ panel "builtin" "evg built-in (finite differences)" (Html.Lazy.lazy2 builtInPanel model.pinTip model.builtIn)
             , panel "gradient" "gradient (exact Jacobian)" (Html.Lazy.lazy2 gradientPanel model.pinTip model.gradient)
-            , Html.div [ A.style "flex-basis" "100%" ]
+            , Html.div [ A.class "gd-full-row" ]
                 [ button
                     (if model.pinTip then
                         "Unpin the tip"
@@ -393,7 +386,7 @@ view model =
         , section "10. A graph that lays itself out"
             [ Html.text "A random graph of 20 nodes (a random tree plus seven extra edges), started scrambled and drawn by minimising stress: every pair of nodes wants to be as far apart on the page as the number of edges between them. Each frame takes a few gradient steps over all pairs at once (20 × 20 tensors) until the layout stops moving. Drag a node: it stays under the pointer and the others relax around it as you move. Let go, and the whole layout settles again. \"New graph\" draws another."
             ]
-            [ panel "layout" "" (Html.div [] [ Html.Lazy.lazy layoutPanel model.layout, Html.div [ A.style "margin-top" "6px" ] [ button "New graph" NewGraph ] ]) ]
+            [ panel "layout" "" (Html.div [] [ Html.Lazy.lazy layoutPanel model.layout, Html.div [ A.class "gd-controls" ] [ button "New graph" NewGraph ] ]) ]
         , para
             [ Html.text "Built with stock Elm 0.19.1: evg's "
             , code "declarative-dragging"
@@ -465,7 +458,7 @@ layoutPanel m =
 
 controls : Float -> (Control -> Msg) -> Trained s -> Html Msg
 controls threshold toMsg t =
-    Html.div [ A.style "display" "flex", A.style "gap" "8px", A.style "align-items" "center", A.style "margin-top" "6px" ]
+    Html.div [ A.class "gd-controls" ]
         [ button
             (case t.training of
                 Running _ ->
@@ -479,7 +472,7 @@ controls threshold toMsg t =
             )
             (toMsg Toggle)
         , button "Reset" (toMsg Reset)
-        , Html.span [ A.style "font-size" "13px", A.style "color" "#495057" ]
+        , Html.span [ A.class "gd-status" ]
             [ Html.text
                 ("step "
                     ++ String.fromInt t.trainer.steps
@@ -525,21 +518,21 @@ twoFigures x =
 
 section : String -> List (Html Msg) -> List (Html Msg) -> Html Msg
 section title intro panels =
-    Html.div [ A.style "margin-top" "28px" ]
-        [ Html.h2 [ A.style "font-size" "20px", A.style "margin-bottom" "4px" ] [ Html.text title ]
+    Html.section [ A.class "gd-section" ]
+        [ Html.h2 [ A.class "gd-section-title" ] [ Html.text title ]
         , para intro
-        , Html.div [ A.style "display" "flex", A.style "flex-wrap" "wrap", A.style "gap" "16px" ] panels
+        , Html.div [ A.class "gd-panels" ] panels
         ]
 
 
 panel : String -> String -> Html Msg -> Html Msg
 panel id caption content =
-    Html.div [ A.id id, A.style "border" "1px solid #dee2e6", A.style "border-radius" "8px", A.style "padding" "8px", A.style "background" "white", A.style "touch-action" "none" ]
+    Html.div [ A.id id, A.class "gd-panel" ]
         ((if caption == "" then
             []
 
           else
-            [ Html.div [ A.style "font-size" "13px", A.style "color" "#495057", A.style "margin-bottom" "4px" ] [ Html.text caption ] ]
+            [ Html.div [ A.class "gd-caption" ] [ Html.text caption ] ]
          )
             ++ [ content ]
         )
@@ -547,19 +540,19 @@ panel id caption content =
 
 para : List (Html Msg) -> Html Msg
 para =
-    Html.p [ A.style "max-width" "780px", A.style "margin" "6px 0 12px" ]
+    Html.p [ A.class "gd-para" ]
 
 
 code : String -> Html Msg
 code s =
-    Html.code [ A.style "background" "#f1f3f5", A.style "padding" "1px 4px", A.style "border-radius" "4px", A.style "font-size" "0.92em" ] [ Html.text s ]
+    Html.code [ A.class "gd-code" ] [ Html.text s ]
 
 
 link : String -> String -> Html Msg
 link url label =
-    Html.a [ A.href url, A.target "_blank" ] [ Html.text label ]
+    Html.a [ A.class "gd-link", A.href url, A.target "_blank" ] [ Html.text label ]
 
 
 button : String -> Msg -> Html Msg
 button label msg =
-    Html.button [ E.onClick msg, A.style "padding" "4px 12px", A.style "border-radius" "6px", A.style "border" "1px solid #adb5bd", A.style "background" "#f8f9fa", A.style "cursor" "pointer" ] [ Html.text label ]
+    Html.button [ A.class "gd-button", E.onClick msg ] [ Html.text label ]
