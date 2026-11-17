@@ -66,13 +66,13 @@ data =
 
 head : App Data ActionData RouteParams -> List Head.Tag
 head _ =
-    Seo.summary
+    Seo.summaryLarge
         { canonicalUrlOverride = Nothing
         , siteName = Settings.title
         , image =
             { url = [ "images", "card.png" ] |> UrlPath.join |> Pages.Url.fromPath
-            , alt = "Two-source interference, one of the drawings"
-            , dimensions = Just { width = 480, height = 300 }
+            , alt = "Six of the draggable drawings: an interference pattern, a classifier's boundary, a tentacle, a Bézier curve, a lens and an epidemic curve"
+            , dimensions = Just { width = 1200, height = 630 }
             , mimeType = Just (MimeType.Image MimeType.Png)
             }
         , description = Settings.description
